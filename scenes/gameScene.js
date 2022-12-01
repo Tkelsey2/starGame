@@ -17,6 +17,8 @@ export default class gameScene extends Phaser.Scene
     {
         //providing an id
         super('game-screen')
+
+        this.gameOver = false
     };
 
     preload()
@@ -27,7 +29,7 @@ export default class gameScene extends Phaser.Scene
         this.load.image(BOMB_KEY, 'assets/bomb.png');
 
         this.scoreLabel = this.createScoreLabel(16, 16, 0)
-
+       
         this.load.spritesheet(PLAYER_KEY, 'assets/dude.png',
             {frameWidth: 32, frameHeight: 42}
         );
@@ -43,18 +45,23 @@ export default class gameScene extends Phaser.Scene
         this.player = this.createPlayer();
         this.stars = this.createStars();
 
-
+        //bomb spawning calls
         this.bombSpawner = new bombSpawner(this, BOMB_KEY)
-        this.bombGroup = this.bombSpawner
+        const bombGroup = this.bombSpawner.group
   
-
+        //text on screen calls
         this.scoreLabel = this.createScoreLabel(16, 16, 0)
+        this.gameOverText = this.add.text(400, 300, 'Game Over', {fontSize: '32px', fill: '#000'})
+        this.gameOverText.setOrigin(0.5)
+        this.gameOverText.visible = false
 
-
+        //collider calls
         this.physics.add.collider(this.player, platforms);
         this.physics.add.collider(this.stars, platforms)
-        this.physics.add.collider(this.bombGroup, platforms)
+        this.physics.add.collider(bombGroup, platforms)
+        this.physics.add.collider(this.player, bombGroup, this.hitBomb, null, this)
 
+        //keyboard input calls
         this.cursors = this.input.keyboard.createCursorKeys();
 
         this.physics.add.overlap(this.player, this.stars, this.collectStar, null, this)
@@ -85,7 +92,9 @@ export default class gameScene extends Phaser.Scene
         {
             this.player.setVelocityY(-330)
         }
+
     };
+
 
     //creating various platforms of size and position
     createPlatforms()
@@ -154,6 +163,7 @@ export default class gameScene extends Phaser.Scene
         return stars
     };
 
+    //collection of stars logic
     collectStar(player, star)
         {
             star.disableBody(true,true)
@@ -162,6 +172,7 @@ export default class gameScene extends Phaser.Scene
 
             console.log('collected')
 
+            //creation of bomb logic and spawning of new stars
             if (this.stars.countActive(true) === 0) {
                 // A new batch of stars to collect
                 this.stars.children.iterate(function (child) {
@@ -175,6 +186,8 @@ export default class gameScene extends Phaser.Scene
 
         };
 
+
+        //score label creation logic
     createScoreLabel(x, y, score)
         {
             const style = { fontSize: '32px', fill: '#000'}
@@ -184,5 +197,22 @@ export default class gameScene extends Phaser.Scene
 
             return label
         }
+
+
+        //Game Over logic
+    hitBomb(player, bomb)
+    {
+        this.physics.pause()
+
+        player.setTint(0xff0000)
+
+        player.anims.play('turn')
+
+        this.gameOver = true
+
+        this.gameOverText.visible = true
+
+        this.input.on('pointerdown', () => this.scene.start('game-scene'))
+    }
 
 };

@@ -16,7 +16,7 @@ export default class gameScene extends Phaser.Scene
     constructor()
     {
         //providing an id
-        super('game-screen')
+        super({key: 'game-screen'})
 
         this.gameOver = false
     };
@@ -212,7 +212,7 @@ export default class gameScene extends Phaser.Scene
 
         this.gameOverText.visible = true
 
-        this.input.on('pointerdown', () => this.scene.start('game-scene'))
+        this.input.on('pointerdown', () => this.scene.restart('game-scene'))
     }
 
 };

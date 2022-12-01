@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 
 import gameScene from './scenes/gameScene';
+import bombSpawner from './scenes/bombSpawner';
 
 const config ={
     type: Phaser.AUTO,

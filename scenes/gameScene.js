@@ -1,11 +1,13 @@
 import Phaser from 'phaser';
 import scoreLabel from '../ui/scoreLabel';
+import bombSpawner from './bombSpawner';
 
 //created key for ease of duplication
 const GROUND_KEY = 'ground';
 const PLAYER_KEY = 'player';
 const STAR_KEY = 'star';
 const BOMB_KEY = 'bomb';
+let stars 
 
 //extend and export the class in one line
 
@@ -24,6 +26,8 @@ export default class gameScene extends Phaser.Scene
         this.load.image(STAR_KEY, 'assets/star.png');
         this.load.image(BOMB_KEY, 'assets/bomb.png');
 
+        this.scoreLabel = this.createScoreLabel(16, 16, 0)
+
         this.load.spritesheet(PLAYER_KEY, 'assets/dude.png',
             {frameWidth: 32, frameHeight: 42}
         );
@@ -37,17 +41,23 @@ export default class gameScene extends Phaser.Scene
         //tidied code up to make coding the collider between player and platform simpler
         const platforms = this.createPlatforms();
         this.player = this.createPlayer();
-        const stars = this.createStars();
+        this.stars = this.createStars();
+
+
+        this.bombSpawner = new bombSpawner(this, BOMB_KEY)
+        this.bombGroup = this.bombSpawner
+  
 
         this.scoreLabel = this.createScoreLabel(16, 16, 0)
 
 
         this.physics.add.collider(this.player, platforms);
-        this.physics.add.collider(stars, platforms)
+        this.physics.add.collider(this.stars, platforms)
+        this.physics.add.collider(this.bombGroup, platforms)
 
         this.cursors = this.input.keyboard.createCursorKeys();
 
-        this.physics.add.overlap(this.player, stars, this.collectStar, null, this)
+        this.physics.add.overlap(this.player, this.stars, this.collectStar, null, this)
 
     };
 
@@ -137,9 +147,10 @@ export default class gameScene extends Phaser.Scene
         });
         
         //each star is a child of the above star group
-        for(const child of stars.children.entries) {
-            child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8))
-        }
+ 
+        stars.children.iterate(function (child) {
+            child.enableBody(true, child.x, 0, true, true)})
+        
         return stars
     };
 
@@ -148,6 +159,20 @@ export default class gameScene extends Phaser.Scene
             star.disableBody(true,true)
 
             this.scoreLabel.add(10)
+
+            console.log('collected')
+
+            if (this.stars.countActive(true) === 0) {
+                // A new batch of stars to collect
+                this.stars.children.iterate(function (child) {
+                child.enableBody(true, child.x, 0, true, true);
+                });
+                this.bombs = this.bombSpawner.spawn(player.x)
+
+
+        }
+        
+
         };
 
     createScoreLabel(x, y, score)

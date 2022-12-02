@@ -31,7 +31,7 @@ export default class gameScene extends Phaser.Scene
         this.scoreLabel = this.createScoreLabel(16, 16, 0)
        
         this.load.spritesheet(PLAYER_KEY, 'assets/dude.png',
-            {frameWidth: 32, frameHeight: 42}
+            {frameWidth: 50, frameHeight: 37}
         );
     };
 
@@ -76,23 +76,34 @@ export default class gameScene extends Phaser.Scene
             this.player.setVelocityX(-160)
 
             this.player.anims.play('left', true)
+
+            this.player.setFlipX(true)
         }
         else if(this.cursors.right.isDown)
         {
             this.player.setVelocityX(160)
 
             this.player.anims.play('right', true)
+
+            this.player.setFlipX(false)
         }
         else{
             this.player.setVelocityX(0)
-            this.player.anims.play('turn')
+            this.player.anims.play('turn',true)
         };
 
         if(this.cursors.up.isDown && this.player.body.touching.down)
         {
             this.player.setVelocityY(-330)
+            this.player.anims.play('up')
+            
+  
         }
 
+        if(this.cursors.up.isDown &! this.player.body.touching.down)
+        {
+            this.player.anims.play('up')
+        }
     };
 
 
@@ -114,6 +125,9 @@ export default class gameScene extends Phaser.Scene
     {
     //configuring player physics and collisions with worldbounds
         const player = this.physics.add.sprite(100, 450, PLAYER_KEY);
+        player.setScale(2)
+        player.setSize(26,32)
+
         player.setBounce(0.2);
         player.setCollideWorldBounds(true);
 
@@ -121,25 +135,34 @@ export default class gameScene extends Phaser.Scene
 
         this.anims.create({
             key:'left',
-            frames: this.anims.generateFrameNumbers(PLAYER_KEY, {start:0, end: 3}),
+            frames: this.anims.generateFrameNumbers(PLAYER_KEY, {start:8, end: 13}),
             frameRate: 10,
-            repeat: -1
+            repeat: -1,
+
         });
 
 
         this.anims.create({
             key: 'turn',
-            frames: [ { key: PLAYER_KEY, frame: 4} ],
-            frameRate: 20
+            frames: this.anims.generateFrameNumbers(PLAYER_KEY, {start:0, end: 3}),
+            frameRate: 5,
+
 
         });
 
         this.anims.create({
             key: 'right',
-            frames: this.anims.generateFrameNumbers(PLAYER_KEY, {start:5, end: 8}),
+            frames: this.anims.generateFrameNumbers(PLAYER_KEY, {start:8, end: 13}),
             frameRate:10,
             repeat: -1
         });
+
+        this.anims.create({
+            key:'up',
+            frames: this.anims.generateFrameNumbers(PLAYER_KEY, {start: 16, end: 25}),
+            frameRate: 10,
+  
+        })
 
         return player
     };

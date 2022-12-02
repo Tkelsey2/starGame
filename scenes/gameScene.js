@@ -16,7 +16,7 @@ export default class gameScene extends Phaser.Scene
     constructor()
     {
         //providing an id
-        super({key: 'game-screen'})
+        super({key: 'game-scene'})
 
         this.gameOver = false
     };
@@ -103,9 +103,9 @@ export default class gameScene extends Phaser.Scene
 
         //adding platforms to their x ad y position
         platforms.create(400, 568, GROUND_KEY).setScale(2).refreshBody();
-        platforms.create(600, 400, GROUND_KEY);
-        platforms.create(50,250, GROUND_KEY);
-        platforms.create(750,220, GROUND_KEY);
+        platforms.create(650, 375, GROUND_KEY);
+        platforms.create(100,250, GROUND_KEY);
+        platforms.create(750,200, GROUND_KEY);
 
         return platforms
     };
@@ -167,6 +167,7 @@ export default class gameScene extends Phaser.Scene
     collectStar(player, star)
         {
             star.disableBody(true,true)
+         
 
             this.scoreLabel.add(10)
 
@@ -177,6 +178,9 @@ export default class gameScene extends Phaser.Scene
                 // A new batch of stars to collect
                 this.stars.children.iterate(function (child) {
                 child.enableBody(true, child.x, 0, true, true);
+                child.setBounce(1)
+                child.setCollideWorldBounds(true)
+                child.setVelocity(Phaser.Math.Between(-100, 100), 10)
                 });
                 this.bombs = this.bombSpawner.spawn(player.x)
 
